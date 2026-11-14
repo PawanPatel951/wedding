@@ -1,0 +1,28 @@
+
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Cormorant Garamond", serif;
+  --font-script: "Great Vibes", cursive;
+  --font-sans: "Montserrat", sans-serif;
+
+  --color-paper: #f8f5ef;
+  --color-wine: #a94358;
+  --color-gold: #b69a70;
+
+  --animate-petal-fall: petal-fall 12s linear infinite;
+
+  @keyframes petal-fall {
+    0% {
+      transform: translateY(-10vh) rotate(0deg);
+      opacity: 0;
+    }
+    10% {
+      opacity: 1;
+    }
+    100% {
+      transform: translateY(110vh) rotate(360deg);
+      opacity: 0;
+    }
+  }
+}
