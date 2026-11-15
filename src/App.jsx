@@ -1,20 +1,20 @@
 
-import { useEffect, useState } from "react";
-import AOS from "aos";
-import "aos/dist/aos.css";
+import { useState, useEffect } from "react";
 import {
   Heart,
+  Flower2,
+  Sparkles,
   CalendarDays,
   MapPin,
   Clock,
-  Flower2,
-  Camera,
   Music2,
-  Instagram,
-  CheckCircle2,
-  Send,
-  Sparkles,
+  Camera,
+  ArrowDown,
+  X,
+  ChevronRight,
 } from "lucide-react";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const weddingDate = new Date("2027-01-02T18:00:00");
 
@@ -27,69 +27,46 @@ const gallery = [
   "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?w=900",
 ];
 
-const petals = [
-  "left-[2%] [animation-delay:-2s]",
-  "left-[7%] [animation-delay:-8s]",
-  "left-[12%] [animation-delay:-4s]",
-  "left-[17%] [animation-delay:-10s]",
-  "left-[22%] [animation-delay:-1s]",
-  "left-[27%] [animation-delay:-6s]",
-  "left-[32%] [animation-delay:-3s]",
-  "left-[37%] [animation-delay:-9s]",
-  "left-[42%] [animation-delay:-5s]",
-  "left-[47%] [animation-delay:-11s]",
-  "left-[52%] [animation-delay:-2s]",
-  "left-[57%] [animation-delay:-7s]",
-  "left-[62%] [animation-delay:-4s]",
-  "left-[67%] [animation-delay:-10s]",
-  "left-[72%] [animation-delay:-1s]",
-  "left-[77%] [animation-delay:-6s]",
-  "left-[82%] [animation-delay:-3s]",
-  "left-[87%] [animation-delay:-9s]",
-  "left-[92%] [animation-delay:-5s]",
-  "left-[97%] [animation-delay:-11s]",
-  "left-[15%] [animation-delay:-7s]",
-  "left-[45%] [animation-delay:-3s]",
-  "left-[75%] [animation-delay:-8s]",
-  "left-[88%] [animation-delay:-1s]",
-];
-
 function Petals() {
   return (
-    <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
-      {petals.map((position, index) => (
+    <div className="pointer-events-none fixed inset-0 z-40 overflow-hidden">
+      {Array.from({ length: 24 }).map((_, i) => (
         <span
-          key={index}
-          className={`absolute top-[-10%] ${position} animate-petal-fall text-xl text-rose-400 opacity-80`}
+          key={i}
+          className="absolute -top-10 animate-petal-fall opacity-70"
+          style={{
+            left: `${(i * 41) % 100}%`,
+            animationDelay: `${-(i % 12)}s`,
+            animationDuration: `${9 + (i % 7)}s`,
+          }}
         >
-          🌹
+          {i % 2 === 0 ? "🌹" : "🌸"}
         </span>
       ))}
     </div>
   );
 }
 
-function Heading({ subtitle, title }) {
+function OrnamentalCorner({ position }) {
   return (
-    <div className="mb-12 text-center" data-aos="fade-up">
-      <p className="mb-3 font-serif text-sm uppercase tracking-[0.35em] text-rose-500">
-        {subtitle}
-      </p>
-      <h2 className="font-wedding text-4xl text-rose-950 md:text-5xl">
-        {title}
-      </h2>
-      <div className="mx-auto mt-5 flex items-center justify-center gap-3 text-rose-400">
-        <span className="h-px w-12 bg-rose-300" />
-        <Flower2 size={20} />
-        <span className="h-px w-12 bg-rose-300" />
-      </div>
+    <div
+      className={`pointer-events-none absolute ${position} text-[#b5a27e]/40`}
+    >
+      <Flower2 size={75} strokeWidth={0.7} />
+      <Flower2
+        size={45}
+        strokeWidth={0.7}
+        className="absolute left-8 top-10 rotate-45"
+      />
     </div>
   );
 }
 
 function App() {
+  const [opened, setOpened] = useState(false);
   const [timeLeft, setTimeLeft] = useState({});
-  const [guestName, setGuestName] = useState("");
+  const [activeImage, setActiveImage] = useState(null);
+  const [name, setName] = useState("");
   const [guests, setGuests] = useState("2");
   const [attendance, setAttendance] = useState("Yes, I will attend");
   const [message, setMessage] = useState("");
@@ -98,41 +75,33 @@ function App() {
     AOS.init({
       duration: 1000,
       easing: "ease-out-cubic",
-      once: false,
-      mirror: true,
+      once: true,
       offset: 70,
     });
-
-    const refreshAOS = () => AOS.refresh();
-    window.addEventListener("load", refreshAOS);
-
-    return () => window.removeEventListener("load", refreshAOS);
   }, []);
 
   useEffect(() => {
-    const updateCountdown = () => {
-      const distance = weddingDate.getTime() - Date.now();
-      const safeDistance = Math.max(distance, 0);
+    const update = () => {
+      const diff = Math.max(weddingDate.getTime() - Date.now(), 0);
 
       setTimeLeft({
-        days: Math.floor(safeDistance / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((safeDistance / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((safeDistance / (1000 * 60)) % 60),
-        seconds: Math.floor((safeDistance / 1000) % 60),
+        Days: Math.floor(diff / 86400000),
+        Hours: Math.floor((diff / 3600000) % 24),
+        Minutes: Math.floor((diff / 60000) % 60),
+        Seconds: Math.floor((diff / 1000) % 60),
       });
     };
 
-    updateCountdown();
-    const timer = setInterval(updateCountdown, 1000);
-
+    update();
+    const timer = setInterval(update, 1000);
     return () => clearInterval(timer);
   }, []);
 
-  const submitRSVP = (event) => {
-    event.preventDefault();
+  const submitRSVP = (e) => {
+    e.preventDefault();
 
-    const text = `Wedding RSVP 💍
-Name: ${guestName}
+    const text = `Wedding Invitation RSVP ❤️
+Name: ${name}
 Guests: ${guests}
 Attendance: ${attendance}
 Message: ${message}`;
@@ -143,273 +112,406 @@ Message: ${message}`;
     );
   };
 
-  const countdownItems = [
-    { label: "Days", value: timeLeft.days },
-    { label: "Hours", value: timeLeft.hours },
-    { label: "Minutes", value: timeLeft.minutes },
-    { label: "Seconds", value: timeLeft.seconds },
-  ];
+  const revealInvitation = () => {
+    setOpened(true);
+    setTimeout(() => {
+      document.getElementById("invitation")?.scrollIntoView({
+        behavior: "smooth",
+      });
+    }, 400);
+  };
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#fffaf7] font-sans text-rose-950">
+    <main className="min-h-screen overflow-hidden bg-[#3b0719] text-[#563c2b]">
       <Petals />
 
-      {/* HERO */}
+      {/* ENVELOPE OPENING SCREEN */}
       <section
-        id="home"
-        className="relative flex min-h-screen items-center justify-center bg-cover bg-center px-5 py-24 text-center"
-        style={{
-          backgroundImage:
-            "linear-gradient(#260b1b70,#260b1b80),url('https://images.unsplash.com/photo-1519741497674-611481863552?w=2000')",
-        }}
+        className={`relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-12 transition-all duration-1000 ${
+          opened ? "min-h-[450px]" : ""
+        }`}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/50" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_#7b2037_0%,_#3b0719_75%)]" />
 
-        <div className="relative z-10 mx-auto max-w-4xl text-white">
-          <p
-            className="mb-8 text-sm uppercase tracking-[0.5em] text-rose-100"
-            data-aos="fade-down"
+        <div className="absolute inset-0 opacity-20"
+          style={{
+            backgroundImage:
+              "url('https://www.transparenttextures.com/patterns/black-scales.png')",
+          }}
+        />
+
+        <div className="relative z-10 w-full max-w-[390px]">
+          <div
+            className={`relative mx-auto transition-all duration-1000 ${
+              opened ? "scale-90 opacity-0 -translate-y-16 pointer-events-none" : ""
+            }`}
           >
-            Together with their families
+            {/* CARD */}
+            <div className="relative aspect-[0.62] overflow-hidden rounded-[12px] border-[7px] border-[#d9ceb6] bg-[#f4efe2] shadow-[0_20px_70px_rgba(0,0,0,0.65)]">
+
+              {/* Paper texture */}
+              <div className="absolute inset-0 bg-[radial-gradient(#c6b99e_0.5px,transparent_0.5px)] [background-size:5px_5px] opacity-20" />
+
+              {/* Inner border */}
+              <div className="absolute inset-2 rounded-[5px] border border-[#c5b58e]/50" />
+
+              {/* Floral corners */}
+              <OrnamentalCorner position="left-3 top-3" />
+              <div className="absolute right-3 top-3 rotate-90">
+                <OrnamentalCorner position="left-0 top-0" />
+              </div>
+              <div className="absolute bottom-3 left-3 -rotate-90">
+                <OrnamentalCorner position="left-0 top-0" />
+              </div>
+              <div className="absolute bottom-3 right-3 rotate-180">
+                <OrnamentalCorner position="left-0 top-0" />
+              </div>
+
+              {/* Top heading */}
+              <div className="absolute left-0 right-0 top-[26%] z-10 text-center">
+                <p className="font-serif text-[10px] uppercase tracking-[0.3em] text-[#968466]">
+                  Tap to reveal
+                </p>
+                <Sparkles className="mx-auto mt-2 text-[#b39b6a]" size={15} />
+              </div>
+
+              {/* Envelope flap */}
+              <div
+                className="absolute inset-x-0 top-0 z-20 h-[57%] origin-top bg-gradient-to-b from-[#fffdf5] to-[#e8dfcb] shadow-[0_9px_12px_rgba(91,65,40,0.18)]"
+                style={{
+                  clipPath: "polygon(0 0,100% 0,100% 0%,50% 100%,0 0%)",
+                }}
+              >
+                <div className="absolute inset-3 border-t border-[#c9b994]/50" />
+              </div>
+
+              {/* Wax seal */}
+              <button
+                onClick={revealInvitation}
+                aria-label="Open wedding invitation"
+                className="absolute left-1/2 top-[53%] z-30 flex h-[112px] w-[112px] -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border-[5px] border-[#7b1b29] bg-gradient-to-br from-[#a52d3c] via-[#650c20] to-[#3f0613] shadow-[0_8px_15px_rgba(0,0,0,0.45)] transition duration-500 hover:scale-110 active:scale-95"
+              >
+                <div className="flex h-[88px] w-[88px] items-center justify-center rounded-full border border-[#d3a77c] text-5xl shadow-inner">
+                  🕉️
+                </div>
+                <span className="absolute -bottom-7 whitespace-nowrap text-[9px] font-semibold uppercase tracking-[0.3em] text-[#806d4c]">
+                  Click to open
+                </span>
+              </button>
+
+              {/* Bottom invitation title */}
+              <div className="absolute bottom-[10%] left-0 right-0 z-10 px-5 text-center">
+                <div className="mb-3 flex items-center justify-center gap-3 text-[#b09a70]">
+                  <span className="h-px w-8 bg-[#b09a70]" />
+                  <Flower2 size={16} />
+                  <span className="h-px w-8 bg-[#b09a70]" />
+                </div>
+
+                <h1 className="font-serif text-3xl font-semibold text-[#8d744d]">
+                  शुभ विवाह
+                </h1>
+
+                <p className="mt-3 text-[10px] leading-5 text-[#89785b]">
+                  सपरिवार शुभ विवाह समारोह में
+                  <br />
+                  पधारकर हमें अनुग्रहित करें।
+                </p>
+
+                <Sparkles className="mx-auto mt-3 text-[#b09a70]" size={14} />
+              </div>
+
+              {/* Decorative envelope lines */}
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-[45%]">
+                <div className="absolute inset-0 border-b border-[#c2b28d]/40"
+                  style={{
+                    clipPath: "polygon(0 0,50% 55%,100% 0,100% 100%,0 100%)",
+                  }}
+                />
+              </div>
+            </div>
+
+            <p className="mt-9 text-center font-serif text-sm italic tracking-widest text-[#e8c99c]">
+              A little surprise awaits you...
+            </p>
+          </div>
+        </div>
+
+        {/* Revealed card transition */}
+        {opened && (
+          <div className="absolute inset-0 z-20 flex items-center justify-center px-5">
+            <div className="text-center text-[#f5dfb8]" data-aos="zoom-in">
+              <Sparkles className="mx-auto mb-5" size={35} />
+              <p className="font-serif text-xl italic">
+                A beautiful beginning...
+              </p>
+              <h2 className="mt-3 font-serif text-4xl">
+                You Are Invited
+              </h2>
+              <p className="mt-4 text-xs uppercase tracking-[0.4em]">
+                Ashdeep & Dilmeet
+              </p>
+              <a
+                href="#invitation"
+                className="mt-8 inline-flex items-center gap-3 rounded-full border border-[#e6c99c] px-7 py-3 text-xs uppercase tracking-widest transition hover:bg-[#e6c99c] hover:text-[#3b0719]"
+              >
+                View Invitation <ChevronRight size={16} />
+              </a>
+            </div>
+          </div>
+        )}
+      </section>
+
+      {/* MAIN INVITATION */}
+      <div
+        className={`transition-all duration-1000 ${
+          opened
+            ? "translate-y-0 opacity-100"
+            : "pointer-events-none h-0 translate-y-16 overflow-hidden opacity-0"
+        }`}
+      >
+        {/* WELCOME */}
+        <section
+          id="invitation"
+          className="relative bg-[#f6efe1] px-5 py-24 text-center"
+        >
+          <div className="absolute inset-3 border border-[#c6ad7d]/50" />
+
+          <Flower2 className="mx-auto mb-6 text-[#aa8b58]" size={35} />
+
+          <p className="text-xs uppercase tracking-[0.4em] text-[#a18556]">
+            With the blessings of our families
           </p>
 
-          <div data-aos="zoom-in">
-            <p className="mb-3 font-serif text-3xl italic text-rose-200">
-              We are getting married
-            </p>
-            <h1 className="font-wedding text-6xl leading-tight md:text-8xl">
-              Ashdeep
-            </h1>
-            <div className="my-3 flex items-center justify-center gap-5">
-              <span className="h-px w-16 bg-rose-200" />
-              <Heart className="fill-rose-300 text-rose-300" size={30} />
-              <span className="h-px w-16 bg-rose-200" />
-            </div>
-            <h1 className="font-wedding text-6xl leading-tight md:text-8xl">
-              Dilmeet
-            </h1>
+          <h2 className="mt-7 font-serif text-4xl text-[#775532] md:text-6xl">
+            शुभ विवाह
+          </h2>
+
+          <p className="mx-auto mt-7 max-w-xl font-serif text-lg leading-9 text-[#806c51]">
+            ईश्वर एवं अपने परिवार के आशीर्वाद से
+            <br />
+            हम अपने जीवन की नई शुरुआत करने जा रहे हैं।
+            <br />
+            इस शुभ अवसर पर आपकी उपस्थिति
+            <br />
+            हमारे लिए अत्यंत सौभाग्य की बात होगी।
+          </p>
+
+          <div className="my-10 flex items-center justify-center gap-4 text-[#b08e5a]">
+            <span className="h-px w-16 bg-[#b08e5a]" />
+            <Heart size={20} />
+            <span className="h-px w-16 bg-[#b08e5a]" />
           </div>
 
-          <p
-            className="mt-9 text-sm uppercase tracking-[0.35em] text-rose-100 md:text-base"
-            data-aos="fade-up"
-          >
+          <h3 className="font-wedding text-5xl text-[#8b3a48] md:text-7xl">
+            Ashdeep & Dilmeet
+          </h3>
+
+          <p className="mt-5 text-xs uppercase tracking-[0.4em] text-[#a18556]">
             02 January 2027
           </p>
+        </section>
 
-          <a
-            href="#invitation"
-            className="mt-10 inline-flex items-center gap-3 rounded-full border border-white/70 px-8 py-4 text-sm uppercase tracking-[0.2em] transition duration-300 hover:border-rose-300 hover:bg-rose-500 hover:text-white"
-            data-aos="fade-up"
-          >
-            Explore Invitation <Heart size={17} />
-          </a>
-        </div>
-
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce text-white">
-          <span className="text-xs uppercase tracking-[0.3em]">Scroll down</span>
-        </div>
-      </section>
-
-      {/* INVITATION */}
-      <section
-        id="invitation"
-        className="relative px-5 py-24 md:py-32"
-      >
-        <div className="mx-auto max-w-4xl text-center" data-aos="fade-up">
-          <Sparkles className="mx-auto mb-6 text-rose-400" size={34} />
-
-          <p className="mb-5 font-serif text-sm uppercase tracking-[0.35em] text-rose-500">
-            A beautiful beginning
-          </p>
-
-          <h2 className="font-wedding text-4xl leading-tight text-rose-950 md:text-6xl">
-            Two Hearts, One Beautiful Journey
-          </h2>
-
-          <p className="mx-auto mt-8 max-w-2xl text-base leading-8 text-rose-900/70 md:text-lg">
-            With the blessings of our families and the love of our dear ones,
-            we invite you to celebrate the beginning of our forever.
-            Your presence will make our special day even more memorable.
-          </p>
-
-          <div className="mt-12 flex justify-center">
-            <Heart className="fill-rose-300 text-rose-300" size={30} />
-          </div>
-        </div>
-      </section>
-
-      {/* COUPLE */}
-      <section className="bg-[#f9eeeb] px-5 py-24">
-        <Heading subtitle="Made for each other" title="The Happy Couple" />
-
-        <div className="mx-auto grid max-w-5xl gap-12 md:grid-cols-2">
-          <div className="text-center" data-aos="fade-right">
-            <div className="mx-auto mb-6 h-72 w-72 overflow-hidden rounded-full border-[10px] border-white shadow-xl">
-              <img
-                src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=700"
-                alt="Bride"
-                className="h-full w-full object-cover transition duration-700 hover:scale-110"
-              />
-            </div>
-            <h3 className="font-wedding text-4xl">Dilmeet</h3>
-            <p className="mt-3 text-sm uppercase tracking-[0.25em] text-rose-500">
-              The Bride
+        {/* HERO PHOTO */}
+        <section
+          className="relative flex min-h-[75vh] items-center justify-center bg-cover bg-center px-5 py-24 text-center text-white"
+          style={{
+            backgroundImage:
+              "linear-gradient(#350c1d88,#350c1dcc),url('https://images.unsplash.com/photo-1519741497674-611481863552?w=1800')",
+          }}
+        >
+          <div data-aos="zoom-in">
+            <Flower2 className="mx-auto mb-7 text-[#e8c99c]" size={35} />
+            <p className="font-serif text-2xl italic text-[#f0d9b6]">
+              Together Forever
+            </p>
+            <h2 className="mt-6 font-wedding text-6xl md:text-8xl">
+              Ashdeep
+            </h2>
+            <Heart className="mx-auto my-4 fill-rose-400 text-rose-400" />
+            <h2 className="font-wedding text-6xl md:text-8xl">
+              Dilmeet
+            </h2>
+            <p className="mt-8 text-xs uppercase tracking-[0.4em] text-[#e8c99c]">
+              02 January 2027
             </p>
           </div>
+        </section>
 
-          <div className="text-center" data-aos="fade-left">
-            <div className="mx-auto mb-6 h-72 w-72 overflow-hidden rounded-full border-[10px] border-white shadow-xl">
-              <img
-                src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=700"
-                alt="Groom"
-                className="h-full w-full object-cover transition duration-700 hover:scale-110"
-              />
-            </div>
-            <h3 className="font-wedding text-4xl">Ashdeep</h3>
-            <p className="mt-3 text-sm uppercase tracking-[0.25em] text-rose-500">
-              The Groom
+        {/* COUPLE */}
+        <section className="bg-[#f6efe1] px-5 py-24">
+          <div className="mb-14 text-center" data-aos="fade-up">
+            <p className="text-xs uppercase tracking-[0.4em] text-[#aa8b58]">
+              Made for each other
             </p>
+            <h2 className="mt-4 font-serif text-4xl text-[#775532] md:text-6xl">
+              The Happy Couple
+            </h2>
           </div>
-        </div>
-      </section>
 
-      {/* COUNTDOWN */}
-      <section className="relative overflow-hidden bg-rose-950 px-5 py-24 text-white">
-        <div className="absolute -left-24 top-0 h-72 w-72 rounded-full bg-rose-700/20 blur-3xl" />
-        <div className="absolute -right-24 bottom-0 h-72 w-72 rounded-full bg-pink-500/20 blur-3xl" />
-
-        <div className="relative mx-auto max-w-5xl text-center">
-          <p className="mb-4 text-sm uppercase tracking-[0.4em] text-rose-200">
-            Save the date
-          </p>
-          <h2 className="mb-12 font-wedding text-4xl md:text-6xl">
-            Counting Every Moment
-          </h2>
-
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-7">
-            {countdownItems.map((item) => (
+          <div className="mx-auto grid max-w-4xl gap-14 md:grid-cols-2">
+            {[
+              {
+                name: "Dilmeet",
+                role: "The Bride",
+                image:
+                  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=700",
+              },
+              {
+                name: "Ashdeep",
+                role: "The Groom",
+                image:
+                  "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=700",
+              },
+            ].map((person, i) => (
               <div
-                key={item.label}
-                className="rounded-2xl border border-white/20 bg-white/10 px-4 py-8 backdrop-blur-md transition duration-300 hover:-translate-y-2 hover:bg-white/20"
-                data-aos="zoom-in"
+                key={person.name}
+                className="text-center"
+                data-aos={i === 0 ? "fade-right" : "fade-left"}
               >
-                <p className="font-wedding text-5xl text-rose-200 md:text-6xl">
-                  {String(item.value ?? 0).padStart(2, "0")}
-                </p>
-                <p className="mt-3 text-xs uppercase tracking-[0.3em] text-white/70">
-                  {item.label}
+                <div className="mx-auto mb-7 h-64 w-64 rounded-full border-[7px] border-[#d6c49e] p-2 shadow-xl">
+                  <img
+                    src={person.image}
+                    alt={person.name}
+                    className="h-full w-full rounded-full object-cover"
+                  />
+                </div>
+                <h3 className="font-wedding text-5xl text-[#8b3a48]">
+                  {person.name}
+                </h3>
+                <p className="mt-3 text-xs uppercase tracking-[0.3em] text-[#a18556]">
+                  {person.role}
                 </p>
               </div>
             ))}
           </div>
-        </div>
-      </section>
+        </section>
 
-      {/* EVENTS */}
-      <section className="px-5 py-24">
-        <Heading subtitle="Join our celebration" title="Wedding Events" />
+        {/* COUNTDOWN */}
+        <section className="bg-[#420d24] px-5 py-24 text-center text-white">
+          <p className="text-xs uppercase tracking-[0.4em] text-[#e8c99c]">
+            Save the date
+          </p>
+          <h2 className="mt-5 font-serif text-4xl md:text-6xl">
+            Counting Every Moment
+          </h2>
 
-        <div className="mx-auto grid max-w-5xl gap-8 md:grid-cols-2">
-          <div
-            className="group rounded-3xl border border-rose-100 bg-white p-9 text-center shadow-lg transition duration-500 hover:-translate-y-3 hover:shadow-2xl"
-            data-aos="fade-right"
-          >
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 text-rose-600 transition group-hover:bg-rose-600 group-hover:text-white">
-              <Flower2 size={30} />
-            </div>
-            <h3 className="font-wedding text-3xl">Wedding Ceremony</h3>
-            <p className="mt-4 text-sm text-rose-700">Saturday, 02 January 2027</p>
-            <div className="mt-7 space-y-4 text-sm text-rose-950/70">
-              <p className="flex items-center justify-center gap-3">
-                <Clock size={17} /> Time to be announced
-              </p>
-              <p className="flex items-center justify-center gap-3">
-                <MapPin size={17} /> Venue details to be announced
-              </p>
-            </div>
-          </div>
-
-          <div
-            className="group rounded-3xl border border-rose-100 bg-white p-9 text-center shadow-lg transition duration-500 hover:-translate-y-3 hover:shadow-2xl"
-            data-aos="fade-left"
-          >
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-rose-100 text-rose-600 transition group-hover:bg-rose-600 group-hover:text-white">
-              <Music2 size={30} />
-            </div>
-            <h3 className="font-wedding text-3xl">Wedding Celebration</h3>
-            <p className="mt-4 text-sm text-rose-700">Saturday, 02 January 2027</p>
-            <div className="mt-7 space-y-4 text-sm text-rose-950/70">
-              <p className="flex items-center justify-center gap-3">
-                <Clock size={17} /> Time to be announced
-              </p>
-              <p className="flex items-center justify-center gap-3">
-                <MapPin size={17} /> Venue details to be announced
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* GALLERY */}
-      <section className="bg-[#f9eeeb] px-5 py-24">
-        <Heading subtitle="Beautiful memories" title="Wedding Gallery" />
-
-        <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 md:grid-cols-3 md:gap-6">
-          {gallery.map((image, index) => (
-            <div
-              key={image}
-              data-aos="zoom-in"
-              data-aos-delay={index * 80}
-              className="group relative aspect-[4/5] overflow-hidden rounded-2xl shadow-lg"
-            >
-              <img
-                src={image}
-                alt={`Wedding gallery ${index + 1}`}
-                loading="lazy"
-                className="h-full w-full object-cover transition duration-700 group-hover:scale-110"
-              />
-              <div className="absolute inset-0 flex items-center justify-center bg-rose-950/0 transition duration-500 group-hover:bg-rose-950/30">
-                <Camera
-                  className="scale-0 text-white transition duration-500 group-hover:scale-100"
-                  size={35}
-                />
+          <div className="mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-4 md:grid-cols-4">
+            {Object.entries(timeLeft).map(([label, value]) => (
+              <div
+                key={label}
+                className="rounded-2xl border border-[#d6b783]/40 bg-white/5 p-7"
+              >
+                <p className="font-serif text-5xl text-[#e8c99c]">
+                  {String(value ?? 0).padStart(2, "0")}
+                </p>
+                <p className="mt-3 text-xs uppercase tracking-widest text-white/70">
+                  {label}
+                </p>
               </div>
-            </div>
-          ))}
-        </div>
-      </section>
+            ))}
+          </div>
+        </section>
 
-      {/* RSVP */}
-      <section id="rsvp" className="px-5 py-24">
-        <Heading subtitle="We would love to see you" title="RSVP" />
+        {/* EVENTS */}
+        <section className="bg-[#f6efe1] px-5 py-24">
+          <div className="mb-14 text-center">
+            <p className="text-xs uppercase tracking-[0.4em] text-[#aa8b58]">
+              Join our celebration
+            </p>
+            <h2 className="mt-4 font-serif text-4xl text-[#775532] md:text-6xl">
+              Wedding Events
+            </h2>
+          </div>
 
-        <form
-          onSubmit={submitRSVP}
-          className="mx-auto max-w-2xl rounded-3xl border border-rose-100 bg-white p-7 shadow-xl md:p-12"
-          data-aos="fade-up"
-        >
-          <div className="mb-6">
-            <label className="mb-2 block text-sm font-semibold text-rose-950">
-              Your Name
-            </label>
+          <div className="mx-auto grid max-w-4xl gap-7 md:grid-cols-2">
+            {[
+              { name: "Wedding Ceremony", icon: Flower2 },
+              { name: "Wedding Celebration", icon: Music2 },
+            ].map((event) => {
+              const Icon = event.icon;
+              return (
+                <div
+                  key={event.name}
+                  className="border border-[#cbb78e] bg-[#fffaf1] p-9 text-center shadow-lg"
+                >
+                  <Icon className="mx-auto mb-5 text-[#a18556]" size={35} />
+                  <h3 className="font-serif text-3xl text-[#775532]">
+                    {event.name}
+                  </h3>
+                  <p className="mt-5 text-sm text-[#9b7951]">
+                    Saturday, 02 January 2027
+                  </p>
+                  <p className="mt-5 flex items-center justify-center gap-2 text-sm text-[#806c51]">
+                    <Clock size={16} /> Time to be announced
+                  </p>
+                  <p className="mt-3 flex items-center justify-center gap-2 text-sm text-[#806c51]">
+                    <MapPin size={16} /> Venue to be announced
+                  </p>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* GALLERY */}
+        <section className="bg-[#eee3d2] px-5 py-24">
+          <div className="mb-12 text-center">
+            <p className="text-xs uppercase tracking-[0.4em] text-[#aa8b58]">
+              Beautiful Memories
+            </p>
+            <h2 className="mt-4 font-serif text-4xl text-[#775532] md:text-6xl">
+              Wedding Gallery
+            </h2>
+          </div>
+
+          <div className="mx-auto grid max-w-6xl grid-cols-2 gap-4 md:grid-cols-3">
+            {gallery.map((image, i) => (
+              <button
+                key={image}
+                onClick={() => setActiveImage(image)}
+                className="aspect-[4/5] overflow-hidden border-4 border-[#fffaf1] shadow-lg"
+                data-aos="zoom-in"
+              >
+                <img
+                  src={image}
+                  alt={`Wedding ${i + 1}`}
+                  loading="lazy"
+                  className="h-full w-full object-cover transition duration-700 hover:scale-110"
+                />
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* RSVP */}
+        <section className="bg-[#f6efe1] px-5 py-24">
+          <div className="mb-12 text-center">
+            <p className="text-xs uppercase tracking-[0.4em] text-[#aa8b58]">
+              We would love to see you
+            </p>
+            <h2 className="mt-4 font-serif text-5xl text-[#775532]">
+              RSVP
+            </h2>
+          </div>
+
+          <form
+            onSubmit={submitRSVP}
+            className="mx-auto max-w-xl border border-[#cbb78e] bg-[#fffaf1] p-7 shadow-xl md:p-10"
+          >
+            <label className="mb-2 block text-sm">Your Name *</label>
             <input
               required
-              value={guestName}
-              onChange={(e) => setGuestName(e.target.value)}
-              placeholder="Enter your full name"
-              className="w-full rounded-xl border border-rose-200 bg-rose-50/50 px-5 py-4 outline-none transition focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter your name"
+              className="mb-6 w-full border border-[#d6c49e] bg-white px-4 py-3 outline-none focus:border-[#8b3a48]"
             />
-          </div>
 
-          <div className="mb-6">
-            <label className="mb-2 block text-sm font-semibold text-rose-950">
-              Number of Guests
-            </label>
+            <label className="mb-2 block text-sm">Number of Guests</label>
             <select
               value={guests}
               onChange={(e) => setGuests(e.target.value)}
-              className="w-full rounded-xl border border-rose-200 bg-rose-50/50 px-5 py-4 outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
+              className="mb-6 w-full border border-[#d6c49e] bg-white px-4 py-3 outline-none"
             >
               <option value="1">1 Guest</option>
               <option value="2">2 Guests</option>
@@ -417,66 +519,73 @@ Message: ${message}`;
               <option value="4">4 Guests</option>
               <option value="5">5+ Guests</option>
             </select>
-          </div>
 
-          <div className="mb-6">
-            <label className="mb-2 block text-sm font-semibold text-rose-950">
-              Will you attend?
-            </label>
+            <label className="mb-2 block text-sm">Will you attend?</label>
             <select
               value={attendance}
               onChange={(e) => setAttendance(e.target.value)}
-              className="w-full rounded-xl border border-rose-200 bg-rose-50/50 px-5 py-4 outline-none focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
+              className="mb-6 w-full border border-[#d6c49e] bg-white px-4 py-3 outline-none"
             >
               <option>Yes, I will attend</option>
               <option>Sorry, I cannot attend</option>
             </select>
-          </div>
 
-          <div className="mb-8">
-            <label className="mb-2 block text-sm font-semibold text-rose-950">
-              Your Message
-            </label>
+            <label className="mb-2 block text-sm">Your Message</label>
             <textarea
               rows="4"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Write your wishes..."
-              className="w-full resize-none rounded-xl border border-rose-200 bg-rose-50/50 px-5 py-4 outline-none transition focus:border-rose-500 focus:ring-2 focus:ring-rose-200"
+              placeholder="Your lovely wishes..."
+              className="mb-7 w-full resize-none border border-[#d6c49e] bg-white px-4 py-3 outline-none"
             />
-          </div>
 
+            <button
+              type="submit"
+              className="w-full bg-[#651b32] px-6 py-4 text-xs font-semibold uppercase tracking-[0.3em] text-white transition hover:bg-[#9a4051]"
+            >
+              Send RSVP ❤️
+            </button>
+          </form>
+        </section>
+
+        {/* FOOTER */}
+        <footer className="bg-[#36091d] px-5 py-20 text-center text-white">
+          <Flower2 className="mx-auto mb-6 text-[#e8c99c]" size={35} />
+          <p className="text-xs uppercase tracking-[0.4em] text-[#e8c99c]">
+            Forever Begins Here
+          </p>
+          <h2 className="mt-7 font-wedding text-6xl md:text-8xl">
+            Ashdeep & Dilmeet
+          </h2>
+          <p className="mt-7 text-sm tracking-[0.3em] text-[#e8c99c]">
+            02 · 01 · 2027
+          </p>
+          <Heart className="mx-auto mt-8 fill-rose-400 text-rose-400" />
+          <p className="mt-8 text-xs text-white/50">
+            Made with love for a beautiful beginning ❤️
+          </p>
+        </footer>
+      </div>
+
+      {/* IMAGE PREVIEW */}
+      {activeImage && (
+        <div
+          className="fixed inset-0 z-[80] flex items-center justify-center bg-black/90 p-5"
+          onClick={() => setActiveImage(null)}
+        >
           <button
-            type="submit"
-            className="flex w-full items-center justify-center gap-3 rounded-full bg-rose-700 px-8 py-4 font-semibold text-white transition duration-300 hover:-translate-y-1 hover:bg-rose-800 hover:shadow-xl"
+            className="absolute right-5 top-5 text-white"
+            onClick={() => setActiveImage(null)}
           >
-            Send RSVP <Send size={18} />
+            <X size={30} />
           </button>
-        </form>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="bg-rose-950 px-5 py-16 text-center text-white">
-        <Heart className="mx-auto mb-5 fill-rose-300 text-rose-300" size={35} />
-        <h2 className="font-wedding text-4xl md:text-5xl">
-          Ashdeep & Dilmeet
-        </h2>
-        <p className="mt-5 text-sm tracking-[0.25em] text-rose-200">
-          02 · 01 · 2027
-        </p>
-        <p className="mx-auto mt-8 max-w-md text-sm leading-7 text-white/60">
-          Thank you for being a part of our beautiful journey.
-          We look forward to celebrating with you.
-        </p>
-        <div className="mt-8 flex justify-center gap-5 text-rose-200">
-          <Instagram size={20} />
-          <CalendarDays size={20} />
-          <CheckCircle2 size={20} />
+          <img
+            src={activeImage}
+            alt="Wedding"
+            className="max-h-[85vh] max-w-full rounded-xl object-contain"
+          />
         </div>
-        <p className="mt-10 text-xs text-white/40">
-          Made with love ❤️
-        </p>
-      </footer>
+      )}
     </main>
   );
 }

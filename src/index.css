@@ -3,26 +3,29 @@
 
 @theme {
   --font-serif: "Cormorant Garamond", serif;
-  --font-script: "Great Vibes", cursive;
-  --font-sans: "Montserrat", sans-serif;
+  --font-wedding: "Great Vibes", cursive;
+  --font-sans: "DM Sans", sans-serif;
+}
 
-  --color-paper: #f8f5ef;
-  --color-wine: #a94358;
-  --color-gold: #b69a70;
+html {
+  scroll-behavior: smooth;
+}
 
-  --animate-petal-fall: petal-fall 12s linear infinite;
+body {
+  margin: 0;
+  font-family: "DM Sans", sans-serif;
+}
 
-  @keyframes petal-fall {
-    0% {
-      transform: translateY(-10vh) rotate(0deg);
-      opacity: 0;
-    }
-    10% {
-      opacity: 1;
-    }
-    100% {
-      transform: translateY(110vh) rotate(360deg);
-      opacity: 0;
-    }
+@keyframes petal-fall {
+  0% {
+    transform: translateY(-10vh) rotate(0deg);
   }
+  100% {
+    transform: translateY(110vh) rotate(360deg);
+  }
+}
+
+.animate-petal-fall {
+  animation: petal-fall 12s linear infinite;
+  will-change: transform;
 }
